@@ -1,3 +1,9 @@
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.metal.MetalButtonUI;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.*;
 
 public class UnitConversionSystem {
@@ -7,33 +13,13 @@ public class UnitConversionSystem {
 
     public static void main(String[] args) {
         initializeUnits(); // Initialize predefined units and conversions
-        
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Welcome to the Unit Conversion System!");
 
-        while (true) {
-            System.out.println("\nOptions:");
-            System.out.println("1. Convert Units");
-            System.out.println("2. Add/Modify Units");
-            System.out.println("3. Exit");
-            System.out.print("Enter your choice: ");
-            
-            int choice = getValidInteger(scanner);
-            switch (choice) {
-                case 1 -> performConversion(scanner);
-                case 2 -> modifyUnits(scanner);
-                case 3 -> {
-                    System.out.println("Exiting the system. Goodbye!");
-                    scanner.close();
-                    return;
-                }
-                default -> System.out.println("Invalid choice. Please try again.");
-            }
-        }
+        // Launch GUI
+        SwingUtilities.invokeLater(() -> new StyledUnitConversionGUI().createAndShowGUI());
     }
 
     // Initialize unit categories and conversion factors
-    private static void initializeUnits() {
+    public static void initializeUnits() {
         // Length units
         addConversion("centimeter", "meter", 0.01);
         addConversion("meter", "centimeter", 100.0);
@@ -74,27 +60,11 @@ public class UnitConversionSystem {
         unitGraph.get("fahrenheit").put("celsius", 0.5556);
     }
 
-    // Perform unit conversion
-    private static void performConversion(Scanner scanner) {
-        System.out.print("Enter the source unit: ");
-        String fromUnit = scanner.nextLine().toLowerCase();
-
-        System.out.print("Enter the target unit: ");
-        String toUnit = scanner.nextLine().toLowerCase();
-
-        System.out.print("Enter the value to convert: ");
-        double value = getValidDouble(scanner);
-
-        try {
-            double result = convertUnit(fromUnit, toUnit, value);
-            System.out.printf("%.4f %s is equal to %.4f %s\n", value, fromUnit, result, toUnit);
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-
     // Unit conversion logic including special handling for temperature
-    private static double convertUnit(String from, String to, double value) throws Exception {
+    public static double convertUnit(String from, String to, double value) throws Exception {
+        from = from.toLowerCase();
+        to = to.toLowerCase();
+
         if (from.equals("celsius") && to.equals("fahrenheit")) {
             return (value * 1.8) + 32;
         } else if (from.equals("fahrenheit") && to.equals("celsius")) {
@@ -134,46 +104,130 @@ public class UnitConversionSystem {
         throw new Exception("Conversion path not found between " + from + " and " + to);
     }
 
-    // Add or modify unit conversion rules
-    private static void modifyUnits(Scanner scanner) {
-        System.out.print("Enter the source unit: ");
-        String from = scanner.nextLine().toLowerCase();
+    // Styled GUI Class
+    static class StyledUnitConversionGUI {
 
-        System.out.print("Enter the target unit: ");
-        String to = scanner.nextLine().toLowerCase();
+        public void createAndShowGUI() {
+            // Main frame
+            JFrame frame = new JFrame("Unit Conversion System");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(700, 450);
 
-        System.out.print("Enter the conversion factor (from -> to): ");
-        double factor = getValidDouble(scanner);
+            // Content panel with padding
+            JPanel contentPanel = new JPanel(new BorderLayout());
+            contentPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+            frame.setContentPane(contentPanel);
+            contentPanel.setBackground(new Color(44, 62, 80)); // Dark blue background
 
-        addConversion(from, to, factor);
-        System.out.println("Conversion rule added/updated successfully.");
-    }
+            // Header
+            JLabel headerLabel = new JLabel("Unit Conversion System", SwingConstants.CENTER);
+            headerLabel.setFont(new Font("Verdana", Font.BOLD, 26));
+            headerLabel.setForeground(Color.WHITE);
+            headerLabel.setBorder(new EmptyBorder(10, 10, 20, 10));
+            contentPanel.add(headerLabel, BorderLayout.NORTH);
 
-    // Utility method to validate integer input
-    private static int getValidInteger(Scanner scanner) {
-        while (true) {
-            try {
-                int value = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
-                return value;
-            } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter a valid integer.");
-                scanner.nextLine(); // Clear invalid input
-            }
+            // Center panel for inputs and results
+            JPanel centerPanel = new JPanel();
+            centerPanel.setLayout(new GridLayout(4, 2, 10, 10));
+            centerPanel.setOpaque(false); // Make transparent
+            contentPanel.add(centerPanel, BorderLayout.CENTER);
+
+            // Input fields and labels
+            JLabel fromLabel = new JLabel("From Unit:");
+            JLabel toLabel = new JLabel("To Unit:");
+            JLabel valueLabel = new JLabel("Value:");
+            JLabel resultLabel = new JLabel("Result:");
+
+            styleLabel(fromLabel);
+            styleLabel(toLabel);
+            styleLabel(valueLabel);
+            styleLabel(resultLabel);
+
+            JComboBox<String> fromUnit = new JComboBox<>(unitGraph.keySet().toArray(new String[0]));
+            JComboBox<String> toUnit = new JComboBox<>(unitGraph.keySet().toArray(new String[0]));
+            JTextField valueField = new JTextField();
+            JLabel resultOutput = new JLabel("---", SwingConstants.CENTER);
+
+            styleDropdown(fromUnit);
+            styleDropdown(toUnit);
+            styleField(valueField);
+            styleResult(resultOutput);
+
+            centerPanel.add(fromLabel);
+            centerPanel.add(fromUnit);
+            centerPanel.add(toLabel);
+            centerPanel.add(toUnit);
+            centerPanel.add(valueLabel);
+            centerPanel.add(valueField);
+            centerPanel.add(resultLabel);
+            centerPanel.add(resultOutput);
+
+            // Footer panel for buttons
+            JPanel footerPanel = new JPanel();
+            footerPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
+            footerPanel.setOpaque(false); // Make transparent
+            contentPanel.add(footerPanel, BorderLayout.SOUTH);
+
+            JButton convertButton = new JButton("Convert");
+            JButton exitButton = new JButton("Exit");
+            styleButton(convertButton);
+            styleButton(exitButton);
+
+            footerPanel.add(convertButton);
+            footerPanel.add(exitButton);
+
+            // Button actions
+            convertButton.addActionListener(e -> {
+                try {
+                    String from = fromUnit.getSelectedItem().toString();
+                    String to = toUnit.getSelectedItem().toString();
+                    double value = Double.parseDouble(valueField.getText());
+
+                    double result = convertUnit(from, to, value);
+                    resultOutput.setText(String.format("%.4f", result));
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(frame, "Please enter a valid number.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(frame, ex.getMessage(), "Conversion Error", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+
+            exitButton.addActionListener(e -> System.exit(0));
+
+            frame.setVisible(true);
         }
-    }
 
-    // Utility method to validate double input
-    private static double getValidDouble(Scanner scanner) {
-        while (true) {
-            try {
-                double value = scanner.nextDouble();
-                scanner.nextLine(); // Consume newline
-                return value;
-            } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter a numeric value.");
-                scanner.nextLine(); // Clear invalid input
-            }
+        // Styling helpers
+        private void styleLabel(JLabel label) {
+            label.setFont(new Font("Verdana", Font.BOLD, 16));
+            label.setForeground(Color.WHITE);
+        }
+
+        private void styleDropdown(JComboBox<String> comboBox) {
+            comboBox.setFont(new Font("Verdana", Font.PLAIN, 14));
+            comboBox.setBackground(new Color(236, 240, 241)); // Light grey
+        }
+
+        private void styleField(JTextField field) {
+            field.setFont(new Font("Verdana", Font.PLAIN, 14));
+            field.setBackground(new Color(236, 240, 241)); // Light grey
+        }
+
+        private void styleResult(JLabel label) {
+            label.setFont(new Font("Verdana", Font.BOLD, 18));
+            label.setForeground(new Color(39, 174, 96)); // Green color
+        }
+
+        private void styleButton(JButton button) {
+            button.setFont(new Font("Verdana", Font.BOLD, 14));
+            button.setBackground(new Color(52, 152, 219)); // Light blue
+            button.setForeground(Color.WHITE);
+            button.setFocusPainted(false);
+            button.setUI(new MetalButtonUI() {
+                protected Color getDisabledTextColor() {
+                    return Color.GRAY;
+                }
+            });
         }
     }
 }
