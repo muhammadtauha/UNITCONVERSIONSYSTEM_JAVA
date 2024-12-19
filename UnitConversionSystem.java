@@ -111,25 +111,37 @@ public class UnitConversionSystem {
             // Main frame
             JFrame frame = new JFrame("Unit Conversion System");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(700, 450);
+            frame.setSize(800, 500);
+            frame.setResizable(false);
 
             // Content panel with padding
             JPanel contentPanel = new JPanel(new BorderLayout());
             contentPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
             frame.setContentPane(contentPanel);
-            contentPanel.setBackground(new Color(44, 62, 80)); // Dark blue background
+            contentPanel.setBackground(new Color(34, 49, 63)); // Dark theme
 
             // Header
             JLabel headerLabel = new JLabel("Unit Conversion System", SwingConstants.CENTER);
-            headerLabel.setFont(new Font("Verdana", Font.BOLD, 26));
+            headerLabel.setFont(new Font("Verdana", Font.BOLD, 28));
             headerLabel.setForeground(Color.WHITE);
             headerLabel.setBorder(new EmptyBorder(10, 10, 20, 10));
             contentPanel.add(headerLabel, BorderLayout.NORTH);
 
             // Center panel for inputs and results
-            JPanel centerPanel = new JPanel();
+            JPanel centerPanel = new JPanel() {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    super.paintComponent(g);
+                    Graphics2D g2d = (Graphics2D) g;
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    GradientPaint gradientPaint = new GradientPaint(0, 0, new Color(52, 152, 219), getWidth(), getHeight(), new Color(41, 128, 185));
+                    g2d.setPaint(gradientPaint);
+                    g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 25, 25);
+                }
+            };
             centerPanel.setLayout(new GridLayout(4, 2, 10, 10));
-            centerPanel.setOpaque(false); // Make transparent
+            centerPanel.setOpaque(false); // Transparent panel
+            centerPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
             contentPanel.add(centerPanel, BorderLayout.CENTER);
 
             // Input fields and labels
@@ -165,7 +177,7 @@ public class UnitConversionSystem {
             // Footer panel for buttons
             JPanel footerPanel = new JPanel();
             footerPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
-            footerPanel.setOpaque(false); // Make transparent
+            footerPanel.setOpaque(false); // Transparent panel
             contentPanel.add(footerPanel, BorderLayout.SOUTH);
 
             JButton convertButton = new JButton("Convert");
@@ -228,6 +240,8 @@ public class UnitConversionSystem {
                     return Color.GRAY;
                 }
             });
+            button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+            button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         }
     }
 }
